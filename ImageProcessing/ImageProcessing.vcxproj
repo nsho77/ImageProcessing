@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="FileView.h" />
+    <ClInclude Include="ImageProc.h" />
     <ClInclude Include="ImageProcessing.h" />
     <ClInclude Include="ImageProcessingDoc.h" />
     <ClInclude Include="ImageProcessingView.h" />
@@ -199,6 +200,7 @@
   <ItemGroup>
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="ImageProc.cpp" />
     <ClCompile Include="ImageProcessing.cpp" />
     <ClCompile Include="ImageProcessingDoc.cpp" />
     <ClCompile Include="ImageProcessingView.cpp" />
