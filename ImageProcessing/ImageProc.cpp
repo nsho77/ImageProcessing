@@ -81,6 +81,9 @@ void ImageProc::BinaryErosion(unsigned char* image_gray,
 			{
 				for (int k = i - neighbor; k<i + 1 + neighbor; k++)
 				{
+					if (k < 0 || k >= width || l < 0 || l >= height)
+						continue;
+
 					if (image_gray[width*l + k] == 0)
 					{
 						temp[width*j + i] = 0;
@@ -123,6 +126,9 @@ void ImageProc::BinaryDilation(unsigned char* image_gray,
 			{
 				for (int k = i - neighbor; k<i + 1 + neighbor; k++)
 				{
+					if (k < 0 || k >= width || l < 0 || l >= height)
+						continue;
+
 					if (image_gray[width*l + k] == 255)
 					{
 						temp[width*j + i] = 255;
