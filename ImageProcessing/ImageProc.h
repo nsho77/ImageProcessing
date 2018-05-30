@@ -15,4 +15,14 @@ public:
 		unsigned char* out_gray, const int width, const int height);
 	static void Binarization(unsigned char* image_gray,
 		const int width, const int height, const unsigned char threshold);
+
+public:
+	static void UserMasking1(unsigned char* image_color,
+		const int width, const int height);
+
+public:
+	static void BinaryErosion(unsigned char* image_gray,
+		const int width, const int height, unsigned char ksize);
+	static void BinaryDilation(unsigned char* image_gray,
+		const int width, const int height, unsigned char ksize);
 };
