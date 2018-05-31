@@ -44,6 +44,35 @@ void ImageProc::MergeChannels(unsigned char* in_color,
 	}
 }
 
+void ImageProc::MergeChannels_RGBToColor(unsigned char* in_R,
+	unsigned char* in_G, unsigned char* in_B, unsigned char* out_color,
+	const int width, const int height)
+{
+	out_color = new unsigned char[width*height];
+	for (int i = 0; i < width*height; i++)
+	{
+		out_color[i * 4 + 0] = in_B[i];
+		out_color[i * 4 + 1] = in_G[i];
+		out_color[i * 4 + 2] = in_R[i];
+	}
+}
+
+void ImageProc::MergeChannels_ColorToRGB(unsigned char* out_R,
+	unsigned char* out_G, unsigned char* out_B, unsigned char* in_color,
+	const int width, const int height)
+{
+	out_R = new unsigned char[width*height];
+	out_G = new unsigned char[width*height];
+	out_B = new unsigned char[width*height];
+
+	for (int i = 0; i < width*height; i++)
+	{
+		out_B[i] = in_color[i * 4 + 0];
+		out_G[i] = in_color[i * 4 + 1];
+		out_R[i] = in_color[i * 4 + 2];
+	}
+}
+
 void ImageProc::Binarization(unsigned char* image_gray,
 	const int width, const int height, const unsigned char threshold)
 {
@@ -144,6 +173,20 @@ void ImageProc::BinaryDilation(unsigned char* image_gray,
 
 	memcpy(image_gray, temp, sizeof(unsigned char)*width*height);
 	delete[] temp;
+}
+
+void ImageProc::BinaryMasking(unsigned char* image_color,
+	unsigned char* image_binary, const int width, const int height)
+{
+	for (int i = 0; i < width*height; i++)
+	{
+		if (image_binary[i] == 0)
+		{
+			image_color[i * 4 + 0] = 0;
+			image_color[i * 4 + 1] = 0;
+			image_color[i * 4 + 2] = 0;
+		}
+	}
 }
 
 void ImageProc::UserMasking1(unsigned char* image_color,
