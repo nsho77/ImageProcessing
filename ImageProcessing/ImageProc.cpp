@@ -198,7 +198,7 @@ void ImageProc::UserMasking1(unsigned char* image_color,
 	{
 		for (int i = 0; i < width; i++)
 		{
-			mask[width*j + i] = static_cast<float>(i) / static_cast<float>(width);
+			mask[width*j + i] = static_cast<float>(width - i) / static_cast<float>(width);
 		}
 	}
 
@@ -208,4 +208,99 @@ void ImageProc::UserMasking1(unsigned char* image_color,
 		image_color[i * 4 + 1] *= mask[i];
 		image_color[i * 4 + 2] *= mask[i];
 	}
+
+	delete[] mask;
+}
+
+void ImageProc::UserMaskingCircle(unsigned char* image_color,
+	const int width, const int height)
+{
+	float* mask = new float[width*height];
+	int centerX = width / 2;
+	int centerY = height / 2;
+	float distanceFromCenterX = 0.f;
+	float distanceFromCenterY = 0.f;
+	float distanceFromCenter = 0.f;
+
+	// 중심으로 부터 거리를 구하고
+	// 거리에 비례해 mask 값을 채운다.
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			distanceFromCenterX = fabsf((static_cast<float>(i) - centerX));
+			distanceFromCenterY = fabsf((static_cast<float>(j) - centerY));
+			distanceFromCenter = sqrt((distanceFromCenterX*distanceFromCenterX)
+				+ (distanceFromCenterY*distanceFromCenterY));
+
+			mask[width*j + i] = ((width / 2) - distanceFromCenter) / (width / 2);
+			if (mask[width*j + i] < 0)
+				mask[width*j + i] = 0;
+		}
+	}
+
+	for (int i = 0; i < width*height; i++)
+	{
+		image_color[i * 4 + 0] *= mask[i];
+		image_color[i * 4 + 1] *= mask[i];
+		image_color[i * 4 + 2] *= mask[i];
+	}
+
+	delete[] mask;
+}
+
+void ImageProc::UserMaskingUpDown(unsigned char* image_color,
+	const int width, const int height)
+{
+	float* mask = new float[width*height];
+
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			mask[width*j + i] = static_cast<float>(height - j) / 
+				static_cast<float>(height);
+		}
+	}
+
+	for (int i = 0; i < width*height; i++)
+	{
+		image_color[i * 4 + 0] *= mask[i];
+		image_color[i * 4 + 1] *= mask[i];
+		image_color[i * 4 + 2] *= mask[i];
+	}
+
+	delete[] mask;
+}
+
+void ImageProc::UserMaskingDivide(unsigned char* image_color,
+	const int width, const int height)
+{
+	unsigned char* mask = new unsigned char[width*height];
+	int changePoint = height / 16;
+	int bZero = -1;
+
+	for (int j = 0; j<height; j++)
+	{
+		for (int i = 0; i<width; i++)
+		{
+			if (j % changePoint == 0)
+				bZero *= (-1);
+
+			if (bZero == 1)
+				mask[width*j + i] = 0;
+			else
+				mask[width*j + i] = 1;
+		}
+	}
+
+	for (int i = 0; i<width*height; i++)
+	{
+		image_color[i * 4 + 0] *= mask[i];
+		image_color[i * 4 + 1] *= mask[i];
+		image_color[i * 4 + 2] *= mask[i];
+	}
+
+	delete[] mask;
+
 }
