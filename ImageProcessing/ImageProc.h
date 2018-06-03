@@ -34,6 +34,8 @@ public:
 		const int width, const int height);
 	static void UserMaskingDivide(unsigned char* image_color,
 		const int width, const int height);
+	static void UserMaskingCUD(unsigned char* image_color,
+		const int width, const int height);
 
 public:
 	static void BinaryErosion(unsigned char* image_gray,
