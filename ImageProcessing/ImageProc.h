@@ -42,4 +42,6 @@ public:
 		const int width, const int height, unsigned char ksize);
 	static void BinaryDilation(unsigned char* image_gray,
 		const int width, const int height, unsigned char ksize);
+	static void AdaptiveBinarization(unsigned char* image_gray,
+		const int width, const int height, int ksize);
 };

@@ -175,6 +175,42 @@ void ImageProc::BinaryDilation(unsigned char* image_gray,
 	delete[] temp;
 }
 
+void ImageProc::AdaptiveBinarization(unsigned char* image_gray,
+	const int width, const int height, int ksize)
+{
+	int neighbor = ksize / 2;
+	unsigned char* temp = new unsigned char[width*height];
+	memcpy(temp, image_gray, sizeof(unsigned char)*width*height);
+
+#pragma omp parallel for schedule(dynamic)
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			float avg = 0.f;
+			int cnt = 0;
+			for (int y = -neighbor; y <= neighbor; y++)
+			{
+				for (int x = -neighbor; x <= neighbor; x++)
+				{
+					if (i+x < 0 || i+x >= width || j+y < 0 || j+y >= height)
+						continue;
+					cnt++;
+					avg += image_gray[width*(j + y) + (i + x)];
+				}
+			}
+			avg = avg / cnt;
+			if (image_gray[width*j + i] < avg)
+				temp[width*j + i] = 0;
+			else
+				temp[width*j + i] = 255;
+		}
+	}
+
+	memcpy(image_gray, temp, sizeof(unsigned char)*width*height);
+	delete[] temp;
+}
+
 void ImageProc::BinaryMasking(unsigned char* image_color,
 	unsigned char* image_binary, const int width, const int height)
 {
