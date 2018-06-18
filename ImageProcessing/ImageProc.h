@@ -17,7 +17,7 @@ public:
 	static void MergeChannels_RGBToColor(unsigned char* in_R,
 		unsigned char* in_G, unsigned char* in_B, unsigned char* out_color,
 		const int width, const int height);
-	static void MergeChannels_ColorToRGB(unsigned char* out_R,
+	static void SplitChannels_ColorToRGB(unsigned char* out_R,
 		unsigned char* out_G, unsigned char* out_B, unsigned char* in_color,
 		const int width, const int height);
 	static void Binarization(unsigned char* image_gray,
@@ -44,4 +44,13 @@ public:
 		const int width, const int height, unsigned char ksize);
 	static void AdaptiveBinarization(unsigned char* image_gray,
 		const int width, const int height, int ksize);
+
+public:
+	static void MaskingImage3x3(unsigned char* image_input,
+		const int width, const int height, float mask[3][3]);
+	/*static void MaskingImage5x5(unsigned char* image_input,
+		const int width, const int height, float mask[3][3]);*/
+	static void AveragingImageUsingMask(unsigned char* image_color,
+		const int width, const int height);
 };
+

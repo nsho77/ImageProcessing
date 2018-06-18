@@ -48,7 +48,6 @@ void ImageProc::MergeChannels_RGBToColor(unsigned char* in_R,
 	unsigned char* in_G, unsigned char* in_B, unsigned char* out_color,
 	const int width, const int height)
 {
-	out_color = new unsigned char[width*height];
 	for (int i = 0; i < width*height; i++)
 	{
 		out_color[i * 4 + 0] = in_B[i];
@@ -57,14 +56,10 @@ void ImageProc::MergeChannels_RGBToColor(unsigned char* in_R,
 	}
 }
 
-void ImageProc::MergeChannels_ColorToRGB(unsigned char* out_R,
+void ImageProc::SplitChannels_ColorToRGB(unsigned char* out_R,
 	unsigned char* out_G, unsigned char* out_B, unsigned char* in_color,
 	const int width, const int height)
 {
-	out_R = new unsigned char[width*height];
-	out_G = new unsigned char[width*height];
-	out_B = new unsigned char[width*height];
-
 	for (int i = 0; i < width*height; i++)
 	{
 		out_B[i] = in_color[i * 4 + 0];
@@ -412,4 +407,62 @@ void ImageProc::UserMaskingCUD(unsigned char* image_color,
 	delete[] mask_circle;
 	delete[] mask_updown;
 	delete[] mask_divide;
+}
+
+void ImageProc::MaskingImage3x3(unsigned char* image_input,
+	const int width, const int height, float mask[3][3])
+{
+	unsigned char* temp = new unsigned char[width*height];
+	memcpy(temp, image_input, sizeof(unsigned char)*width*height);
+
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			float sum = 0.f;
+			for (int y = -1; y <= 1; y++)
+			{
+				for (int x = -1; x <= 1; x++)
+				{
+					if ((x + i) >= width || (x + i) < 0 ||
+						(y + j) >= height || (y + j) < 0) continue;
+
+					sum += image_input[width*(j + y) + (x + i)] 
+						* mask[y + 1][x + 1];
+				}
+			}
+			temp[width*j + i] = static_cast<unsigned char>(sum);
+		}
+	}
+
+	memcpy(image_input, temp, sizeof(unsigned char)*width*height);
+	delete[] temp;
+
+}
+
+void ImageProc::AveragingImageUsingMask(unsigned char* image_color,
+	const int width, const int height)
+{
+	float mask[3][3] =
+	{
+		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f },
+		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f },
+		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f }
+	};
+
+	unsigned char* image_R = new unsigned char[width*height];
+	unsigned char* image_G = new unsigned char[width*height];
+	unsigned char* image_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(image_R, image_G, image_B, image_color, width, height);
+
+	MaskingImage3x3(image_R, width, height, mask);
+	MaskingImage3x3(image_G, width, height, mask);
+	MaskingImage3x3(image_B, width, height, mask);
+
+	MergeChannels_RGBToColor(image_R,image_G,image_B,image_color,width,height);
+
+	delete[] image_R;
+	delete[] image_G;
+	delete[] image_B;
 }
