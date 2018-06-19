@@ -508,3 +508,87 @@ void ImageProc::AveragingImageUsingMask(unsigned char* image_color,
 	delete[] image_G;
 	delete[] image_B;
 }
+
+void ImageProc::SobelMasking(unsigned char* image_color,
+	const int width, const int height)
+{
+	float mask_sobel[5][5] = {
+		{ -1.f, -1.f, 0.f, 1.f, 1.f },
+		{ -1.f, -1.f, 0.f, 1.f, 1.f },
+		{ -2.f, -2.f, 0.f, 2.f, 2.f },
+		{ -1.f, -1.f, 0.f, 1.f, 1.f },
+		{ -1.f, -1.f, 0.f, 1.f, 1.f },
+	};
+
+	unsigned char* image_R = new unsigned char[width*height];
+	unsigned char* image_G = new unsigned char[width*height];
+	unsigned char* image_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(image_R, image_G, image_B, image_color, width, height);
+
+	MaskingImage5x5(image_R, width, height, mask_sobel);
+	MaskingImage5x5(image_G, width, height, mask_sobel);
+	MaskingImage5x5(image_B, width, height, mask_sobel);
+
+	MergeChannels_RGBToColor(image_R, image_G, image_B, image_color, width, height);
+
+	delete[] image_R;
+	delete[] image_G;
+	delete[] image_B;
+}
+
+void ImageProc::LaplacianMasking(unsigned char* image_color,
+	const int width, const int height)
+{
+	float mask_laplacian[5][5] = {
+		{ -4.f, -1.f, 0.f, -1.f, -4.f },
+		{ -1.f,  2.f, 3.f,  2.f, -1.f },
+		{  0.f,  3.f, 4.f,  3.f,  0.f },
+		{ -1.f,  2.f, 3.f,  2.f, -1.f },
+		{ -4.f, -1.f, 0.f, -1.f, -4.f },
+	};
+
+	unsigned char* image_R = new unsigned char[width*height];
+	unsigned char* image_G = new unsigned char[width*height];
+	unsigned char* image_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(image_R, image_G, image_B, image_color, width, height);
+
+	MaskingImage5x5(image_R, width, height, mask_laplacian);
+	MaskingImage5x5(image_G, width, height, mask_laplacian);
+	MaskingImage5x5(image_B, width, height, mask_laplacian);
+
+	MergeChannels_RGBToColor(image_R, image_G, image_B, image_color, width, height);
+
+	delete[] image_R;
+	delete[] image_G;
+	delete[] image_B;
+}
+
+void ImageProc::GausianMasking(unsigned char* image_color,
+	const int width, const int height)
+{
+	float mask_gausian[5][5] = {
+		{ 1.f / 273.f,	4.f / 273.f,  7.f / 273.f, 4.f  / 273.f, 1.f / 273.f },
+		{ 4.f / 273.f, 16.f / 273.f, 26.f / 273.f, 16.f / 273.f, 4.f / 273.f },
+		{ 7.f / 273.f, 26.f / 273.f, 41.f / 273.f, 26.f / 273.f, 7.f / 273.f },
+		{ 4.f / 273.f, 16.f / 273.f, 26.f / 273.f, 16.f / 273.f, 4.f / 273.f },
+		{ 1.f / 273.f,	4.f / 273.f,  7.f / 273.f, 4.f  / 273.f, 1.f / 273.f },
+	};
+
+	unsigned char* image_R = new unsigned char[width*height];
+	unsigned char* image_G = new unsigned char[width*height];
+	unsigned char* image_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(image_R, image_G, image_B, image_color, width, height);
+
+	MaskingImage5x5(image_R, width, height, mask_gausian);
+	MaskingImage5x5(image_G, width, height, mask_gausian);
+	MaskingImage5x5(image_B, width, height, mask_gausian);
+
+	MergeChannels_RGBToColor(image_R, image_G, image_B, image_color, width, height);
+
+	delete[] image_R;
+	delete[] image_G;
+	delete[] image_B;
+}

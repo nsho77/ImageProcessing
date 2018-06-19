@@ -52,5 +52,11 @@ public:
 		const int width, const int height, float mask[5][5]);
 	static void AveragingImageUsingMask(unsigned char* image_color,
 		const int width, const int height);
+	static void SobelMasking(unsigned char* image_color,
+		const int width, const int height);
+	static void LaplacianMasking(unsigned char* image_color,
+		const int width, const int height);
+	static void GausianMasking(unsigned char* image_color,
+		const int width, const int height);
 };
 
