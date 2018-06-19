@@ -440,14 +440,53 @@ void ImageProc::MaskingImage3x3(unsigned char* image_input,
 
 }
 
+void ImageProc::MaskingImage5x5(unsigned char* image_input,
+	const int width, const int height, float mask[5][5])
+{
+	unsigned char* temp = new unsigned char[width*height];
+	memcpy(temp, image_input, sizeof(unsigned char)*width*height);
+
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			float sum = 0.f;
+			for (int y = -2; y <= 2; y++)
+			{
+				for (int x = -2; x <= 2; x++)
+				{
+					if ((x + i) >= width || (x + i) < 0 ||
+						(y + j) >= height || (y + j) < 0) continue;
+
+					sum += image_input[width*(j + y) + (x + i)]
+						* mask[y + 2][x + 2];
+				}
+			}
+			temp[width*j + i] = static_cast<unsigned char>(sum);
+		}
+	}
+
+	memcpy(image_input, temp, sizeof(unsigned char)*width*height);
+	delete[] temp;
+
+}
+
 void ImageProc::AveragingImageUsingMask(unsigned char* image_color,
 	const int width, const int height)
 {
-	float mask[3][3] =
+	/*float mask[3][3] =
 	{
 		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f },
 		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f },
 		{ 1.f / 9.f, 1.f / 9.f, 1.f / 9.f }
+	};*/
+
+	float mask[5][5] = {
+	{ 1.f / 25.f , 1.f / 25.f , 1.f / 25.f, 1.f / 25.f, 1.f / 25.f },
+	{ 1.f / 25.f , 1.f / 25.f , 1.f / 25.f, 1.f / 25.f, 1.f / 25.f },
+	{ 1.f / 25.f , 1.f / 25.f , 1.f / 25.f, 1.f / 25.f, 1.f / 25.f },
+	{ 1.f / 25.f , 1.f / 25.f , 1.f / 25.f, 1.f / 25.f, 1.f / 25.f },
+	{ 1.f / 25.f , 1.f / 25.f , 1.f / 25.f, 1.f / 25.f, 1.f / 25.f }
 	};
 
 	unsigned char* image_R = new unsigned char[width*height];
@@ -456,9 +495,12 @@ void ImageProc::AveragingImageUsingMask(unsigned char* image_color,
 
 	SplitChannels_ColorToRGB(image_R, image_G, image_B, image_color, width, height);
 
-	MaskingImage3x3(image_R, width, height, mask);
+	/*MaskingImage3x3(image_R, width, height, mask);
 	MaskingImage3x3(image_G, width, height, mask);
-	MaskingImage3x3(image_B, width, height, mask);
+	MaskingImage3x3(image_B, width, height, mask);*/
+	MaskingImage5x5(image_R, width, height, mask);
+	MaskingImage5x5(image_G, width, height, mask);
+	MaskingImage5x5(image_B, width, height, mask);
 
 	MergeChannels_RGBToColor(image_R,image_G,image_B,image_color,width,height);
 

@@ -48,8 +48,8 @@ public:
 public:
 	static void MaskingImage3x3(unsigned char* image_input,
 		const int width, const int height, float mask[3][3]);
-	/*static void MaskingImage5x5(unsigned char* image_input,
-		const int width, const int height, float mask[3][3]);*/
+	static void MaskingImage5x5(unsigned char* image_input,
+		const int width, const int height, float mask[5][5]);
 	static void AveragingImageUsingMask(unsigned char* image_color,
 		const int width, const int height);
 };
