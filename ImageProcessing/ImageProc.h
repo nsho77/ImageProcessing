@@ -1,5 +1,8 @@
 #pragma once
 #include <math.h>
+#include <vector>
+
+using namespace std;
 
 class ImageProc
 {
@@ -58,5 +61,14 @@ public:
 		const int width, const int height);
 	static void GausianMasking(unsigned char* image_color,
 		const int width, const int height);
+	static void MedianFilterSingleChannel(unsigned char* image_input,
+		const int width, const int height, int ksize, int sortMethod);
+	static void MedianFilter(unsigned char* image_color,
+		const int width, const int height, int ksize, char* sortMethod);
+
+public:
+	static void MyRadixSort(vector<unsigned char>& arr);
+	static int MedianOfMedians(unsigned char *v, int n, int k);
+	static void mySwap(unsigned char& num1, unsigned char& num2);
 };
 

@@ -53,6 +53,7 @@ void ImageProc::MergeChannels_RGBToColor(unsigned char* in_R,
 		out_color[i * 4 + 0] = in_B[i];
 		out_color[i * 4 + 1] = in_G[i];
 		out_color[i * 4 + 2] = in_R[i];
+		out_color[i * 4 + 3] = 0;
 	}
 }
 
@@ -591,4 +592,161 @@ void ImageProc::GausianMasking(unsigned char* image_color,
 	delete[] image_R;
 	delete[] image_G;
 	delete[] image_B;
+}
+
+
+void ImageProc::MyRadixSort(vector<unsigned char>& arr)
+{
+	int bucket[256] = { 0 };
+
+	for (int i = 0; i < arr.size(); i++)
+		bucket[arr[i]]++;
+
+	arr.clear();
+
+	for (int i = 0; i < 256; i++)
+	{
+		for (int j = 0; j < bucket[i]; j++)
+			arr.push_back(i);
+	}
+}
+
+void ImageProc::mySwap(unsigned char& num1, unsigned char& num2)
+{
+	int temp = num1;
+	num1 = num2;
+	num2 = temp;
+}
+
+int ImageProc::MedianOfMedians(unsigned char *v, int n, int k) {
+	if (n == 1 && k == 0) return v[0];
+
+	int m = (n + 4) / 5;
+	unsigned char *medians = new unsigned char[m];
+	for (int i = 0; i<m; i++) {
+		if (5 * i + 4 < n) {
+			unsigned char *w = v + 5 * i;
+			for (int j0 = 0; j0<3; j0++) {
+				int jmin = j0;
+				for (int j = j0 + 1; j<5; j++) {
+					if (w[j] < w[jmin]) jmin = j;
+				}
+				mySwap(w[j0], w[jmin]);
+			}
+			medians[i] = w[2];
+		}
+		else {
+			medians[i] = v[5 * i];
+		}
+	}
+
+	int pivot = MedianOfMedians(medians, m, m / 2);
+	delete[] medians;
+
+	for (int i = 0; i<n; i++) {
+		if (v[i] == pivot) {
+			mySwap(v[i], v[n - 1]);
+			break;
+		}
+	}
+
+	int store = 0;
+	for (int i = 0; i<n - 1; i++) {
+		if (v[i] < pivot) {
+			mySwap(v[i], v[store++]);
+		}
+	}
+	mySwap(v[store], v[n - 1]);
+
+	if (store == k) {
+		return pivot;
+	}
+	else if (store > k) {
+		return MedianOfMedians(v, store, k);
+	}
+	else {
+		return MedianOfMedians(v + store + 1, n - store - 1, k - store - 1);
+	}
+}
+
+void ImageProc::MedianFilterSingleChannel(unsigned char* image_input,
+	const int width, const int height, int ksize, int sortMethod)
+{
+	if (ksize % 2 == 0 || ksize == 1) return;
+	if (sortMethod == -1)
+	{
+		printf("sort method error");
+		return;
+	}
+
+	unsigned char* temp = new unsigned char[width*height];
+	memcpy(temp, image_input, sizeof(unsigned char)*width*height);
+
+	int neighbor = ksize / 2;
+
+#pragma omp parallel for schedule(dynamic)
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			vector<unsigned char> medianArr;
+			medianArr.resize(ksize*ksize);
+			for (int x = -neighbor; x <= neighbor; x++)
+			{
+				for (int y = -neighbor; y <= neighbor; y++)
+				{
+					if (x + i >= width || x + i < 0 || y + j >= height
+						|| y + j < 0) continue;
+
+					medianArr[ksize*(y + neighbor) + (x + neighbor)] =
+						image_input[width*(y + j) + (x + i)];
+				}
+			}
+
+			if (sortMethod == 1)
+			{
+				//radix sort medianArr
+				MyRadixSort(medianArr);
+				temp[width*j + i] = medianArr[medianArr.size() / 2];
+			}
+			else if (sortMethod == 2)
+			{
+				//median of medians
+				temp[width*j + i] = MedianOfMedians(&medianArr[0], medianArr.size(), medianArr.size() / 2);
+			}
+				
+		}
+	}
+
+	memcpy(image_input, temp, sizeof(unsigned char)*width*height);
+	delete[] temp;
+}
+
+void ImageProc::MedianFilter(unsigned char* image_color,
+	const int width, const int height, int ksize, char* sortMethod)
+{
+	int numOfSortMethod = -1;
+	if (!strncmp(sortMethod, "RadixSort", strlen(sortMethod)))
+		numOfSortMethod = 1;
+	if (!strncmp(sortMethod, "MedianOfMedians", strlen(sortMethod)))
+		numOfSortMethod = 2;
+
+	printf("numOfSortMethod : %d", numOfSortMethod);
+
+	unsigned char* img_R = new unsigned char[width*height];
+	unsigned char* img_G = new unsigned char[width*height];
+	unsigned char* img_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(img_R, img_G, img_B, image_color, width, height);
+
+	MedianFilterSingleChannel(img_R, width, height, ksize, numOfSortMethod);
+	MedianFilterSingleChannel(img_G, width, height, ksize, numOfSortMethod);
+	MedianFilterSingleChannel(img_B, width, height, ksize, numOfSortMethod);
+
+	MergeChannels_RGBToColor(img_R, img_G, img_B, image_color, width, height);
+
+	delete[] img_R;
+	delete[] img_G;
+	delete[] img_B;
+
 }
