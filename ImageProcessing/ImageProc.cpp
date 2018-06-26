@@ -750,3 +750,57 @@ void ImageProc::MedianFilter(unsigned char* image_color,
 	delete[] img_B;
 
 }
+
+void ImageProc::CreateHistogramSingleChannel(unsigned char* image_input,
+	unsigned char* histo_output, const int width, const int height,
+	const int histo_width, const int histo_height)
+{
+	float valArr[256] = { 0.f };
+	float max = 0.f;
+	for (int i = 0; i < width*height; i++)
+	{
+		valArr[image_input[i]] += 1.f;
+		max = __max(valArr[image_input[i]], max);
+	}
+		
+	
+	for (int i = 0; i < 256; i++)
+	{
+		valArr[i] = (valArr[i] / max) * histo_height;
+		for (int j = 0; j < valArr[i]; j++)
+		{
+			histo_output[(histo_height - 1 - j)*histo_width + (i * 2) + 0] = 255;
+			histo_output[(histo_height - 1 - j)*histo_width + (i * 2) + 1] = 255;
+		}
+	}
+}
+
+void ImageProc::CreateHistogram(unsigned char* image_input,
+	unsigned char* histo_output, const int width, const int height,
+	const int histo_width, const int histo_height)
+{
+	unsigned char* img_R = new unsigned char[width*height];
+	unsigned char* img_G = new unsigned char[width*height];
+	unsigned char* img_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(img_R, img_G, img_B, image_input, width, height);
+	
+	unsigned char* histo_R = new unsigned char[histo_width*histo_height];
+	unsigned char* histo_G = new unsigned char[histo_width*histo_height];
+	unsigned char* histo_B = new unsigned char[histo_width*histo_height];
+
+	SplitChannels_ColorToRGB(histo_R, histo_G, histo_B, histo_output, histo_width, histo_height);
+
+	CreateHistogramSingleChannel(img_R, histo_R, width, height, histo_width, histo_height);
+	CreateHistogramSingleChannel(img_G, histo_G, width, height, histo_width, histo_height);
+	CreateHistogramSingleChannel(img_B, histo_B, width, height, histo_width, histo_height);
+
+	MergeChannels_RGBToColor(histo_R, histo_G, histo_B, histo_output, histo_width, histo_height);
+
+	delete[] img_R;
+	delete[] img_G;
+	delete[] img_B;
+	delete[] histo_R;
+	delete[] histo_G;
+	delete[] histo_B;
+}

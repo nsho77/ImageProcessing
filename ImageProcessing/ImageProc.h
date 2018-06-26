@@ -70,5 +70,13 @@ public:
 	static void MyRadixSort(vector<unsigned char>& arr);
 	static int MedianOfMedians(unsigned char *v, int n, int k);
 	static void mySwap(unsigned char& num1, unsigned char& num2);
+
+public:
+	static void CreateHistogramSingleChannel(unsigned char* image_input,
+		unsigned char* histo_output, const int width, const int height,
+		const int histo_width, const int histo_height);
+	static void CreateHistogram(unsigned char* image_input,
+		unsigned char* histo_output, const int width, const int height,
+		const int histo_width, const int histo_height);
 };
 
