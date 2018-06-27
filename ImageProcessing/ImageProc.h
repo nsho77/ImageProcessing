@@ -78,5 +78,9 @@ public:
 	static void CreateHistogram(unsigned char* image_input,
 		unsigned char* histo_output, const int width, const int height,
 		const int histo_width, const int histo_height);
+	static void CreateCumulativeHistogramSingleChannel(unsigned char* image_input,
+		unsigned char* image_output, const int width, const int height);
+	static void CreateHistogramEqualization(unsigned char* image_input,
+		unsigned char* image_output, const int width, const int height);
 };
 

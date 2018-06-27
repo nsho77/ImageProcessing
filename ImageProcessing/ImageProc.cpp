@@ -804,3 +804,61 @@ void ImageProc::CreateHistogram(unsigned char* image_input,
 	delete[] histo_G;
 	delete[] histo_B;
 }
+
+void ImageProc::CreateCumulativeHistogramSingleChannel(unsigned char* image_input,
+	unsigned char* image_output, const int width, const int height)
+{
+	// 1. 히스토그램을 만든다.
+	float histogram[256] = { 0.f };
+	for (int i = 0; i < width*height; i++)
+		histogram[image_input[i]]++;
+
+	// 2. 누적히스토그램을 만든다.
+	float cumulative_histogram[256] = { 0.f };
+	float sum = 0.f;
+	for (int i = 0; i < 256; i++)
+	{
+		sum += histogram[i];
+		cumulative_histogram[i] = sum;
+	}
+
+	// 누적히스토그램을 정규화한다.
+	// 정규화 = (값 / 최대값(이미지 사이즈)) * 픽셀최대값(255)
+	for (int i = 0; i < 256; i++)
+		cumulative_histogram[i] = (cumulative_histogram[i] / (width * height)) * 255 + 0.5f;
+
+	// 3. 이미지에 적용한다.
+	for (int i = 0; i < width*height; i++)
+		image_output[i] = static_cast<unsigned char>(cumulative_histogram[image_input[i]]);
+
+}
+
+void ImageProc::CreateHistogramEqualization(unsigned char* image_input,
+	unsigned char* image_output, const int width, const int height)
+{
+	unsigned char* img_R = new unsigned char[width*height];
+	unsigned char* img_G = new unsigned char[width*height];
+	unsigned char* img_B = new unsigned char[width*height];
+
+	SplitChannels_ColorToRGB(img_R, img_G, img_B, image_input, width, height);
+
+	unsigned char* equal_R = new unsigned char[width*height];
+	unsigned char* equal_G = new unsigned char[width*height];
+	unsigned char* equal_B = new unsigned char[width*height];
+
+	//SplitChannels_ColorToRGB(equal_R, equal_G, equal_B, image_output, width, height);
+
+	CreateCumulativeHistogramSingleChannel(img_R, equal_R, width, height);
+	CreateCumulativeHistogramSingleChannel(img_G, equal_G, width, height);
+	CreateCumulativeHistogramSingleChannel(img_B, equal_B, width, height);
+
+	MergeChannels_RGBToColor(equal_R, equal_G, equal_B, image_output, width, height);
+
+	delete[] img_R;
+	delete[] img_G;
+	delete[] img_B;
+
+	delete[] equal_R;
+	delete[] equal_G;
+	delete[] equal_B;
+}
