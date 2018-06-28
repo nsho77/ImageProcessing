@@ -82,5 +82,9 @@ public:
 		unsigned char* image_output, const int width, const int height);
 	static void CreateHistogramEqualization(unsigned char* image_input,
 		unsigned char* image_output, const int width, const int height);
+
+public:
+	static void CountRedBloodCell(unsigned char* image_input,
+		const int width, const int height);
 };
 

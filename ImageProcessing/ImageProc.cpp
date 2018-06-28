@@ -862,3 +862,127 @@ void ImageProc::CreateHistogramEqualization(unsigned char* image_input,
 	delete[] equal_G;
 	delete[] equal_B;
 }
+
+void ImageProc::CountRedBloodCell(unsigned char* image_input,
+	const int width, const int height)
+{
+	// 좌표값을 저장할 수 있는 구조체를 정의한다.
+	struct POINT
+	{
+		int x;
+		int y;
+		POINT(void)
+		{
+			x = -1;
+			y = -1;
+		}
+		POINT(int _x, int _y)
+		{
+			x = _x;
+			y = _y;
+		}
+	};
+	// 적혈구 숫자 카운트하는 변수
+	int cnt = 0;
+	// 적혈구를 찾을 수 없을 때까지 반복한다.
+	while (1)
+	{
+		// 0 인 픽셀에 도달하면
+		// 해당 좌표를 시작지점으로
+		// region growing 을 시작한다.
+
+		// seed 선언
+		POINT seed = POINT();
+
+		for (int j = 0; j < height; j++)
+		{
+			for (int i = 0; i < width; i++)
+			{
+				// 픽셀 값이 0 이면
+				// seed에 좌표 저장
+				if (image_input[j*width + i] == 0)
+				{
+					seed = POINT(i, j);
+					break;
+				}
+			}
+			// seed 값을 찾으면 seed 찾는 반복문 종료
+			// 못찾으면 끝까지 탐색
+			if (seed.x != -1 && seed.y != -1) break;
+		}
+		
+		// 끝까지 탐색해도 못찾으면
+		// 이진 이미지 탐색 종료
+		if (seed.x == -1 && seed.y == -1) break;
+		
+		// seed 를 바탕으로 region growing 을 시작함
+		// region growing 이란 그래프 탐색에서 너비우선 탐색을 의미함.
+		// 탐색하면서 좌표의 최소값과 최대값을 저장한다.
+		// 이미 탐색한 적혈구는 gray 색으로 체크한다.
+		vector<POINT> queue;
+		queue.push_back(seed);
+
+		// 좌표의 최대값과 최소값을 저장할 변수
+		POINT minPoint = POINT(width-1, height-1);
+		POINT maxPoint = POINT(0, 0);
+
+		// queue 가 완전히 비워질때까지 탐색한다.
+		while (!queue.empty())
+		{
+			POINT cur_seed = POINT(queue[0].x, queue[0].y);
+
+			// 주위 1pixel 을 보며 queue에 넣고 체크한다.
+			for (int x = -1; x <= 1; x++)
+			{
+				for (int y = -1; y <= 1; y++)
+				{
+					if((cur_seed.y + y)>= height || (cur_seed.y + y) <0
+						|| (cur_seed.x + x) >= width || (cur_seed.x + x) < 0) continue;
+
+					if (image_input[width*(cur_seed.y + y)
+						+ (cur_seed.x + x)] == 0)
+					{
+						// 방문체크
+						image_input[width*(cur_seed.y + y)
+							+ (cur_seed.x + x)] = 127;
+
+						// 최소, 최대값 체크
+						minPoint.x = __min(minPoint.x, cur_seed.x + x);
+						minPoint.y = __min(minPoint.y, cur_seed.y + y);
+						maxPoint.x = __max(maxPoint.x, cur_seed.x + x);
+						maxPoint.y = __max(maxPoint.y, cur_seed.y + y);
+
+						// queue push back
+						queue.push_back(POINT(cur_seed.x + x, cur_seed.y + y));
+					}
+				}
+			}
+			
+			// queue의 가장 앞부분을 pop 한다.
+			queue.erase(queue.begin());
+		}
+
+		// 최대 최소값을 통해 적혈구 여부를 파악하고 카운팅한다.
+		// 적혈구면 가운데 하얀점을 찍는다.
+		float cell_width = maxPoint.x - minPoint.x;
+		float cell_height = maxPoint.y - minPoint.y;
+		if ( cell_height == 0
+			|| cell_width / cell_height > 2 
+			|| cell_width / cell_height < 0.5 ) continue;
+		// 적혈구 숫자 카운팅
+		cnt++;
+		// 가운데 점 찍기
+		POINT center = POINT((maxPoint.x + minPoint.x) / 2,
+			(maxPoint.y + minPoint.y) / 2);
+		for (int x = -1; x <= 1; x++)
+		{
+			for (int y = -1; y <= 1; y++)
+			{
+				image_input[(center.y+y)*width + center.x+x] = 255;
+			}
+		}
+		
+	}
+
+	printf("red blood cell cnt : %d\n", cnt);
+}
