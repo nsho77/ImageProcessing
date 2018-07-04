@@ -986,3 +986,19 @@ void ImageProc::CountRedBloodCell(unsigned char* image_input,
 
 	printf("red blood cell cnt : %d\n", cnt);
 }
+
+bool ImageProc::AllocateGPUMemory(int width, int height)
+{
+	if (ImageProc_AllocGPUMemory(width, height))
+		return true;
+	else
+		return false;
+}
+
+bool ImageProc::DeAllocateGPUMemory(void)
+{
+	if (ImageProc_DeAllocGPUMemory())
+		return true;
+	else
+		return false;
+}

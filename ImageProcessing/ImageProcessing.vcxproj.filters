@@ -177,4 +177,9 @@
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="CUDAImageProc.cu">
+      <Filter>소스 파일</Filter>
+    </CudaCompile>
+  </ItemGroup>
 </Project>

@@ -4,6 +4,13 @@
 
 using namespace std;
 
+//CUDAImageProc.cu 에 정의한 함수를 쓰기위해 선언한다.
+extern "C"
+{
+	int ImageProc_AllocGPUMemory(int width, int height);
+	int ImageProc_DeAllocGPUMemory();
+}
+
 class ImageProc
 {
 public:
@@ -86,5 +93,9 @@ public:
 public:
 	static void CountRedBloodCell(unsigned char* image_input,
 		const int width, const int height);
+
+public:
+	bool AllocateGPUMemory(int width, int height);
+	bool DeAllocateGPUMemory(void);
 };
 
