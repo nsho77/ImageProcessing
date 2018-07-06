@@ -9,6 +9,8 @@ extern "C"
 {
 	int ImageProc_AllocGPUMemory(int width, int height);
 	int ImageProc_DeAllocGPUMemory();
+	int ImageProc_AdaptiveBinarization(unsigned char* image_gray,
+		int width, int height, int ksize);
 }
 
 class ImageProc
@@ -97,5 +99,7 @@ public:
 public:
 	bool AllocateGPUMemory(int width, int height);
 	bool DeAllocateGPUMemory(void);
+	bool GPU_AdaptiveBinarization(unsigned char* image_gray,
+		int width, int height, int ksize);
 };
 

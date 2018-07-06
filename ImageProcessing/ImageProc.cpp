@@ -1002,3 +1002,17 @@ bool ImageProc::DeAllocateGPUMemory(void)
 	else
 		return false;
 }
+
+bool ImageProc::GPU_AdaptiveBinarization(unsigned char* image_gray,
+	int width, int height, int ksize)
+{
+	printf("GPU_AdaptiveBinarization\n");
+	int res = ImageProc_AdaptiveBinarization(image_gray, width, height, ksize);
+	if (res < 0)
+	{
+		printf("GPU_AdaptiveBinarization failed error code is %d \n,",res);
+		return false;
+	}
+	else
+		return true;
+}

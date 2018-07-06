@@ -67,6 +67,36 @@ int ImageProc_DeAllocGPUMemory(void)
 	return 1;
 }
 
+__global__ void Kernel_AdaptiveBinarization(unsigned char* image_gray,
+	unsigned char* output_image, int width, int height, int ksize)
+{
+	if (ksize == 1 || ksize % 2 == 0) return;
+	int neighbor = ksize / 2;
+	// blockIdx, blockDim, threadIdx 로 좌표를 찾는다.
+	// blockDim 은 block 사이즈 이므로 아래와 같이 좌표를 구할 수 있다.
+	int i = blockIdx.x*blockDim.x+threadIdx.x;
+	int j = blockIdx.y*blockDim.y+threadIdx.y;
+
+	float avg = 0.f;
+	float cnt = 0.f;
+
+	for (int x = -neighbor; x <= neighbor; x++)
+	{
+		for (int y = -neighbor; y <= neighbor; y++)
+		{
+			if (i + x < 0 || i + x >= width || j + y < 0 || j + y >= height)
+				continue;
+			avg += image_gray[width*(j + y) + (i + x)];
+			cnt += 1.f;
+		}
+	}
+	avg = avg / cnt;
+	if (image_gray[width*j + i] > avg)
+		output_image[width*j + i] = 255;
+	else
+		output_image[width*j + i] = 0;
+}
+
 extern "C"
 int ImageProc_AdaptiveBinarization(unsigned char* image_gray,
 	int width, int height, int ksize)
@@ -83,6 +113,16 @@ int ImageProc_AdaptiveBinarization(unsigned char* image_gray,
 		return -2;
 
 	// 커널 함수를 실행한다.
+	// GridDim.x, GridDim.y, BlockDim.x, BlockDim.y 를 정의한다.
+	dim3 Db = dim3(8,8);
+	dim3 Dg = dim3((width + Db.x - 1) / Db.x, (height + Db.y - 1) / Db.y);
+	Kernel_AdaptiveBinarization<<< Dg, Db >>> (g_tempBuffer[0],
+		g_tempBuffer[1],width,height,ksize);
+
+	// 커널 함수 실행이 제대로 되었는지 확인한다.
+	cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess)
+		return -3;
 
 
 	// 커널 함수 모두 종료를 확인한다.
