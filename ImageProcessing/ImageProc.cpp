@@ -1016,3 +1016,31 @@ bool ImageProc::GPU_AdaptiveBinarization(unsigned char* image_gray,
 	else
 		return true;
 }
+
+bool ImageProc::GPU_BinaryDilation(unsigned char* image_binary,
+	int width, int height, int ksize)
+{
+	printf("GPU_BinaryDilation\n");
+	int res = ImageProc_BinaryDilation(image_binary, width, height, ksize);
+	if (res < 0)
+	{
+		printf("GPU_BinaryDilation failed error code is %d \n,", res);
+		return false;
+	}
+	else
+		return true;
+}
+
+bool ImageProc::GPU_BinaryErosion(unsigned char* image_binary,
+	int width, int height, int ksize)
+{
+	printf("GPU_BinaryErosion\n");
+	int res = ImageProc_BinaryErosion(image_binary, width, height, ksize);
+	if (res < 0)
+	{
+		printf("GPU_BinaryErosion failed error code is %d \n,", res);
+		return false;
+	}
+	else
+		return true;
+}

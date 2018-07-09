@@ -11,6 +11,10 @@ extern "C"
 	int ImageProc_DeAllocGPUMemory();
 	int ImageProc_AdaptiveBinarization(unsigned char* image_gray,
 		int width, int height, int ksize);
+	int ImageProc_BinaryDilation(unsigned char* image_binary,
+		int width, int height, int ksize);
+	int ImageProc_BinaryErosion(unsigned char* image_binary,
+		int width, int height, int ksize);
 }
 
 class ImageProc
@@ -100,6 +104,10 @@ public:
 	bool AllocateGPUMemory(int width, int height);
 	bool DeAllocateGPUMemory(void);
 	bool GPU_AdaptiveBinarization(unsigned char* image_gray,
+		int width, int height, int ksize);
+	bool GPU_BinaryDilation(unsigned char* image_binary,
+		int width, int height, int ksize);
+	bool GPU_BinaryErosion(unsigned char* image_binary,
 		int width, int height, int ksize);
 };
 
